@@ -22,26 +22,7 @@ import pickle
 #import subclasses
 import Methods 
 
-def DataPreparing(numFlies, numstates, sequence_length, n_neurons, batch_size, lag, name_mat, states):
-    #this loops sets the size of the numpy array that will contain the data
-    minlength=500000
-    mat_file = loadmat(name_mat)
-    for i,x in enumerate(mat_file[states]):
-        if np.size(x[0])<minlength:
-            minlength=np.size(x[0])
-
-    #putting the data into a numpy array
-    dt = np.zeros((numFlies,minlength))
-    for i,x in enumerate(mat_file[states]):
-        dt[i,:]=x[0][0:minlength,0]-1
-        indices = np.where(dt[i,:]==255)[0]
-        indices2 = np.where(np.diff(indices)>1)[0]
-        for idx in indices:
-            if idx==0:
-                dt[i,0]=np.random.randint(0,high=numstates)
-            else:
-                dt[i,idx]=copy(dt[i,idx-1])
-
+def DataPreparing(dt, numFlies, numstates, sequence_length, n_neurons, batch_size, lag):
     #batching the data
     v=.8
     inp,targ=Methods.get_batches(dt,batch_size,sequence_length,lag=lag)

@@ -1,3 +1,6 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"]="0,1"
+
 import numpy as np
 import matplotlib.pyplot as plt
 import keras
@@ -21,8 +24,10 @@ import pickle
 
 #import subclasses
 import Methods 
+import DataImport
 import DataPreparing
 import Model
+import Prediction
 
 numFlies=59
 numstates=117
@@ -36,15 +41,20 @@ states='reduced_states'
 
 ### Traning ###############################################################################################################################################################
 
+#data importing
+#parameters: name_mat, states, numFlies, numstates
+#returns: dt
+dt = DataImport.DataImport(name_mat, states, numFlies, numstates)
+
 #data preparing 
-#paramters: numFlies, numstates, sequence_length, n_neurons, batch_size, lag, name_mat, states
+#paramters: dt, numFlies, numstates, sequence_length, n_neurons, batch_size, lag
 #returns: i_train, t_train, i_test, t_test
-i_train, t_train, i_test, t_test = DataPreparing(numFlies, numstates, sequence_length, n_neurons, batch_size, lag, name_mat, states)
+i_train, t_train, i_test, t_test = DataPreparing.DataPreparing(dt, numFlies, numstates, sequence_length, n_neurons, batch_size, lag)
 
 #model
 #parameters: numstates, n_neurons, batch_size, i_train, t_train, i_test, t_test
 #returns: history, model
-history, model = Model(numstates, n_neurons, batch_size, i_train, t_train, i_test, t_test)
+history, model = Model.Model(numstates, n_neurons, batch_size, i_train, t_train, i_test, t_test)
 
 #save history
 filename = f'history/Katherine_RNN_lag200.pkl'
@@ -68,3 +78,9 @@ plt.savefig(f'loss/Katherine_loss_lag500')
 print("Training is done")
 
 ### Prediction ####################################################################################################################################
+
+#predicting 
+#parameters: dt, model, numFlies, lag, batch_size, numstates
+#returns: s_ (predicted data with probility in 117 states), s (states picked)
+s_, s = Prediction.Prediction (dt, model, numFlies, lag, batch_size, numstates)
+
